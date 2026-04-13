@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Hero } from "@/components/landing/hero";
 import { CoreValue } from "@/components/landing/core-value";
 import { WhatYouGet } from "@/components/landing/what-you-get";
@@ -17,7 +18,9 @@ export default function Home() {
       <TypesPreview />
       <Compare />
       <Objections />
-      <CtaForm />
+      <Suspense>
+        <CtaForm />
+      </Suspense>
     </main>
   );
 }

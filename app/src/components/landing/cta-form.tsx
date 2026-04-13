@@ -1,19 +1,24 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function CtaForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
 
   const isValid = name.trim().length > 0;
+  const friendCode = searchParams.get("friend");
 
   const handleSubmit = useCallback(() => {
     if (!isValid) return;
     const params = new URLSearchParams({ name: name.trim() });
-    router.push(`/quiz/?${params.toString()}`);
-  }, [isValid, name, router]);
+    if (friendCode) {
+      params.set("friend", friendCode);
+    }
+    router.push(`/quiz?${params.toString()}`);
+  }, [isValid, name, friendCode, router]);
 
   return (
     <section id="cta" className="py-24 px-5 bg-[#2c2c2c] text-[#f5f0e8] relative overflow-hidden">
