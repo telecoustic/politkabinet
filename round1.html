@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Политкабинет</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f0e8;
+      color: #2c2c2c;
+      min-height: 100dvh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    /* --- Screens --- */
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100dvh;
+      padding: 2rem 1.25rem;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* --- Screen 1: Welcome --- */
+
+    .welcome {
+      justify-content: center;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .welcome-emoji {
+      font-size: 4.5rem;
+      line-height: 1;
+    }
+
+    .welcome h1 {
+      font-size: 2.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .welcome .subtitle {
+      font-size: 1.05rem;
+      color: #666;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .welcome .input-group {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .welcome input[type="text"] {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 2px solid #d4cfc4;
+      border-radius: 12px;
+      background: #fff;
+      color: #2c2c2c;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .welcome input[type="text"]:focus {
+      border-color: #2c2c2c;
+    }
+
+    .welcome input[type="text"]::placeholder {
+      color: #aaa;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-size: 1.1rem;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 700;
+      color: #fff;
+      background: #2c2c2c;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      min-height: 48px;
+      transition: opacity 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .btn-primary:disabled:active {
+      transform: none;
+    }
+
+    /* --- Screen 2: Quiz --- */
+
+    .quiz {
+      justify-content: flex-start;
+      padding-top: 1.5rem;
+      gap: 1.5rem;
+    }
+
+    .quiz-header {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #d4cfc4;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #2c2c2c;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .question-number {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #999;
+      text-align: center;
+    }
+
+    .question-text {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.35;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 1rem 1.125rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      line-height: 1.4;
+      color: #2c2c2c;
+      background: #fff;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      min-height: 48px;
+      text-align: left;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .option:active {
+      transform: scale(0.98);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .option.selected {
+      border-color: #2c2c2c;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Screen 3: Result --- */
+
+    .result {
+      justify-content: flex-start;
+      text-align: center;
+      gap: 1.25rem;
+      padding-top: 2.5rem;
+      padding-bottom: 3rem;
+    }
+
+    .result-emoji {
+      font-size: 4rem;
+      line-height: 1;
+    }
+
+    .result-type {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .result-desc {
+      font-size: 1rem;
+      color: #555;
+      max-width: 360px;
+      line-height: 1.55;
+    }
+
+    /* --- Axes --- */
+
+    .axes {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .axis-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .axis-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .axis-bar {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      background: #e6e1d8;
+      border-radius: 5px;
+      overflow: visible;
+    }
+
+    .axis-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 5px;
+      width: 50%;
+      transition: width 0.5s ease;
+    }
+
+    .axis-marker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      transition: left 0.5s ease;
+    }
+
+    /* Axis colors */
+    .axis-econ .axis-fill { background: rgba(207, 73, 68, 0.25); }
+    .axis-econ .axis-marker { background: #cf4944; }
+
+    .axis-diplo .axis-fill { background: rgba(59, 120, 186, 0.25); }
+    .axis-diplo .axis-marker { background: #3b78ba; }
+
+    .axis-gov .axis-fill { background: rgba(72, 157, 93, 0.25); }
+    .axis-gov .axis-marker { background: #489d5d; }
+
+    .axis-soc .axis-fill { background: rgba(198, 163, 50, 0.25); }
+    .axis-soc .axis-marker { background: #c6a332; }
+
+    /* --- Result code --- */
+
+    .result-code {
+      display: inline-block;
+      font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 0.95rem;
+      background: #eae5db;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+      margin-top: 0.25rem;
+    }
+
+    .result-code:active {
+      background: #ddd8cd;
+    }
+
+    .result-code-hint {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 0.15rem;
+    }
+
+    .btn-restart {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 600;
+      color: #2c2c2c;
+      background: transparent;
+      border: 2px solid #d4cfc4;
+      border-radius: 12px;
+      cursor: pointer;
+      min-height: 48px;
+      margin-top: 0.5rem;
+      transition: border-color 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-restart:active {
+      transform: scale(0.97);
+      border-color: #2c2c2c;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Welcome -->
+  <div id="screen-welcome" class="screen welcome active">
+    <div class="welcome-emoji">&#x1f3db;&#xfe0f;</div>
+    <h1>Политкабинет</h1>
+    <p class="subtitle">24 житейские ситуации покажут, какой вы политический зверь на самом деле</p>
+    <div class="input-group">
+      <input type="text" id="input-name" placeholder="Ваше имя" autocomplete="given-name">
+      <button id="btn-start" class="btn-primary" disabled>Поехали</button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Quiz -->
+  <div id="screen-quiz" class="screen quiz">
+    <div class="quiz-header">
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <div id="question-number" class="question-number">Вопрос 1 из 24</div>
+    </div>
+    <div id="question-text" class="question-text">Текст вопроса будет здесь</div>
+    <div id="options" class="options">
+      <button class="option">Вариант ответа A</button>
+      <button class="option">Вариант ответа B</button>
+      <button class="option">Вариант ответа C</button>
+      <button class="option">Вариант ответа D</button>
+    </div>
+  </div>
+
+  <!-- Screen 3: Result -->
+  <div id="screen-result" class="screen result">
+    <div id="result-emoji" class="result-emoji">&#x1f981;</div>
+    <div id="result-type" class="result-type">Либеральный космополит</div>
+    <p id="result-desc" class="result-desc">Вы верите в свободу личности, открытые границы и прогресс через науку. Ваш идеальный мир — где каждый сам решает, как жить.</p>
+
+    <div class="axes">
+      <div class="axis-row axis-econ">
+        <div class="axis-labels">
+          <span>Равенство</span>
+          <span>Рынок</span>
+        </div>
+        <div class="axis-bar">
+          <div class="axis-fill" style="width: 65%"></div>
+          <div id="marker-econ" class="axis-marker" style="left: 65%"></div>
+        </div>
+      </div>
+
+      <div class="axis-row axis-diplo">
+        <div class="axis-labels">
+          <span>Глобализм</span>
+          <span>Нация</span>
+        </div>
+        <div class="axis-bar">
+          <div class="axis-fill" style="width: 30%"></div>
+          <div id="marker-diplo" class="axis-marker" style="left: 30%"></div>
+        </div>
+      </div>
+
+      <div class="axis-row axis-gov">
+        <div class="axis-labels">
+          <span>Свобода</span>
+          <span>Авторитаризм</span>
+        </div>
+        <div class="axis-bar">
+          <div class="axis-fill" style="width: 25%"></div>
+          <div id="marker-gov" class="axis-marker" style="left: 25%"></div>
+        </div>
+      </div>
+
+      <div class="axis-row axis-soc">
+        <div class="axis-labels">
+          <span>Прогресс</span>
+          <span>Традиция</span>
+        </div>
+        <div class="axis-bar">
+          <div class="axis-fill" style="width: 40%"></div>
+          <div id="marker-soc" class="axis-marker" style="left: 40%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="result-code" class="result-code">--</div>
+    <div class="result-code-hint">нажмите, чтобы скопировать</div>
+
+    <button id="btn-restart" class="btn-restart">Пройти заново</button>
+  </div>
+
+  <script>
+    // ========== PART 1: Questions ==========
+
+    const questions = [
+      // --- ECONOMY (6) ---
+      {
+        text: "Знакомая открыла кофейню, но дела идут плохо. Аренда съедает всё. Она просит совета.",
+        options: [
+          { text: "Государство должно субсидировать малый бизнес в таких случаях", scores: { econ: -8 } },
+          { text: "Пусть берёт кредит и борется — рынок сам расставит всё по местам", scores: { econ: +8 } },
+          { text: "Надо скинуться с друзьями и помочь ей продержаться", scores: { econ: -5, soc: +5 } },
+          { text: "Пусть найдёт инвестора — это нормальный бизнес-процесс", scores: { econ: +6, gov: -4 } }
+        ]
+      },
+      {
+        text: "В подъезде сломался лифт. Управляющая компания говорит: ремонт дорогой, нужно скинуться дополнительно.",
+        options: [
+          { text: "Это обязанность города — пусть чинят за бюджетные деньги", scores: { econ: -7, gov: +5 } },
+          { text: "Нормально, мы же пользуемся — справедливо заплатить", scores: { econ: +7 } },
+          { text: "Пусть жильцы проголосуют, нужен ли им вообще лифт за такие деньги", scores: { econ: +5, gov: -5 } },
+          { text: "Надо добиться, чтобы управляющая компания взяла расходы на себя — это их работа", scores: { econ: -5 } }
+        ]
+      },
+      {
+        text: "Друг зовёт вложиться в его стартап. Идея рискованная, но потенциально прибыльная.",
+        options: [
+          { text: "Вложусь — кто не рискует, тот не пьёт шампанское", scores: { econ: +8 } },
+          { text: "Лучше бы он подал на грант от государства", scores: { econ: -7 } },
+          { text: "Предложу ему вместе поискать надёжного инвестора", scores: { econ: +5, diplo: -4 } },
+          { text: "Рискованные проекты должны страховаться государственными фондами", scores: { econ: -6, gov: +5 } }
+        ]
+      },
+      {
+        text: "Любимый бренд одежды резко поднял цены. Качество то же, просто \"рынок\".",
+        options: [
+          { text: "Их право — не нравится, не покупай", scores: { econ: +7 } },
+          { text: "Должен быть потолок цен на базовые товары", scores: { econ: -8, gov: +5 } },
+          { text: "Пора поддерживать местных производителей вместо брендов", scores: { econ: -4, diplo: +5 } },
+          { text: "Конкуренция решит — появится аналог дешевле", scores: { econ: +6 } }
+        ]
+      },
+      {
+        text: "Сосед выращивает яблоки и продаёт их у подъезда без всяких документов.",
+        options: [
+          { text: "Молодец, предпринимательский дух! Пусть продаёт", scores: { econ: +7, gov: -5 } },
+          { text: "Должен оформить самозанятость и платить налоги", scores: { econ: +4, gov: +6 } },
+          { text: "Лучше бы продавал через кооператив с соседями", scores: { econ: -6 } },
+          { text: "Без документов — это риск для покупателей, нужен минимальный контроль", scores: { gov: +8, econ: -4 } }
+        ]
+      },
+      {
+        text: "В вашем районе закрывается последний книжный магазин — не выдержал конкуренции с маркетплейсами.",
+        options: [
+          { text: "Грустно, но это естественный отбор — маркетплейсы удобнее", scores: { econ: +8 } },
+          { text: "Город должен поддерживать такие места — это культурная ценность", scores: { econ: -7, soc: +4 } },
+          { text: "Жители района могли бы создать книжный клуб и выкупить магазин вскладчину", scores: { econ: -5 } },
+          { text: "Нужен налог на маркетплейсы, чтобы уравнять условия", scores: { econ: -6, gov: +5 } }
+        ]
+      },
+
+      // --- DIPLOMACY (6) ---
+      {
+        text: "Дочь получила предложение учиться в университете за границей. Она в восторге, вы думаете.",
+        options: [
+          { text: "Отличный шанс — мир большой, пусть увидит его", scores: { diplo: -8 } },
+          { text: "Лучше бы наши вузы были на таком уровне, чтобы не уезжать", scores: { diplo: +5, soc: +4 } },
+          { text: "Пусть едет, но потом обязательно вернётся — стране нужны мозги", scores: { diplo: +6 } },
+          { text: "Поддержу, но немного тревожно — далеко и чужая культура", scores: { diplo: +4, soc: +5 } }
+        ]
+      },
+      {
+        text: "В вашем районе открылся ресторан узбекской кухни. Очень вкусно, но некоторые соседи недовольны.",
+        options: [
+          { text: "Прекрасно! Разнообразие кухонь делает город интереснее", scores: { diplo: -7, soc: -4 } },
+          { text: "Нормально, лишь бы санитарные нормы соблюдали", scores: { diplo: -3, gov: +4 } },
+          { text: "Понимаю соседей — хотелось бы больше заведений с нашей кухней", scores: { diplo: +7 } },
+          { text: "Пусть работают, но вывеска должна быть на русском", scores: { diplo: +5, gov: +4 } }
+        ]
+      },
+      {
+        text: "На работе предлагают нанять удалённого специалиста из другой страны — он сильнее местных кандидатов и дешевле.",
+        options: [
+          { text: "Компетенции важнее паспорта — берите лучшего", scores: { diplo: -8, econ: +5 } },
+          { text: "Сначала надо дать шанс своим, даже если придётся доучить", scores: { diplo: +7 } },
+          { text: "Нормально, но налоги он должен платить здесь", scores: { diplo: +4, gov: +4 } },
+          { text: "Хорошо для команды — разные культуры дают свежие идеи", scores: { diplo: -6 } }
+        ]
+      },
+      {
+        text: "В новостях — землетрясение в далёкой стране. Собирают пожертвования.",
+        options: [
+          { text: "Отправлю сколько могу — люди есть люди, неважно где", scores: { diplo: -8 } },
+          { text: "Лучше помогу бездомным в своём городе — своих проблем хватает", scores: { diplo: +7 } },
+          { text: "Государство должно помочь официально, а не перекладывать на граждан", scores: { diplo: -4, gov: +5 } },
+          { text: "Помогу, но только если уверен, что деньги дойдут до людей", scores: { diplo: -5, econ: +4 } }
+        ]
+      },
+      {
+        text: "В класс к ребёнку пришёл новый ученик, который плохо говорит по-русски.",
+        options: [
+          { text: "Школа должна обеспечить ему языковую поддержку — все дети имеют право на образование", scores: { diplo: -7, econ: -4 } },
+          { text: "Пусть сначала выучит язык — нечестно тормозить весь класс", scores: { diplo: +6, econ: +4 } },
+          { text: "Хороший повод для детей познакомиться с другой культурой", scores: { diplo: -6, soc: -4 } },
+          { text: "Его родители должны были подготовить ребёнка до школы", scores: { diplo: +7 } }
+        ]
+      },
+      {
+        text: "В магазине выбираете между местным продуктом (дороже, хуже упаковка) и импортным (дешевле, красивый).",
+        options: [
+          { text: "Возьму местный — надо поддерживать своих производителей", scores: { diplo: +8 } },
+          { text: "Возьму импортный — кошелёк голосует за качество и цену", scores: { diplo: -6, econ: +5 } },
+          { text: "Зависит от продукта — не принципиально, откуда он", scores: { diplo: -4 } },
+          { text: "Лучше бы ввели пошлины, чтобы местные могли конкурировать", scores: { diplo: +6, econ: -5 } }
+        ]
+      },
+
+      // --- GOVERNMENT (6) ---
+      {
+        text: "Сосед сдаёт квартиру через Airbnb. Шумные гости каждые выходные.",
+        options: [
+          { text: "Его квартира — его дело, я не вправе указывать", scores: { gov: -7 } },
+          { text: "Нужен закон, ограничивающий краткосрочную аренду в жилых домах", scores: { gov: +8 } },
+          { text: "Жильцы дома должны сами договориться и установить правила", scores: { gov: -5 } },
+          { text: "Пусть арендует, но штрафы за шум должны быть жёсткими", scores: { gov: +5, econ: +4 } }
+        ]
+      },
+      {
+        text: "Город устанавливает камеры видеонаблюдения на каждом углу. Говорят — для безопасности.",
+        options: [
+          { text: "Чувствую себя спокойнее, когда знаю, что камеры работают", scores: { gov: +8 } },
+          { text: "Это слежка, а не безопасность. Личное пространство священно", scores: { gov: -8 } },
+          { text: "Камеры ок, но доступ к записям должен быть строго ограничен", scores: { gov: +4, soc: -4 } },
+          { text: "Лучше бы потратили деньги на освещение улиц и патрули", scores: { gov: -4, econ: -4 } }
+        ]
+      },
+      {
+        text: "Знакомый нашёл легальную лазейку и платит почти нулевые налоги. Законно, но сомнительно.",
+        options: [
+          { text: "Молодец, умеет пользоваться системой — законно значит нормально", scores: { gov: -7, econ: +6 } },
+          { text: "Законы надо ужесточить, чтобы таких лазеек не было", scores: { gov: +7 } },
+          { text: "Это проблема системы, а не человека — нужна налоговая реформа", scores: { gov: +4, econ: -4 } },
+          { text: "Морально неправильно, но я бы тоже так сделал", scores: { gov: -5 } }
+        ]
+      },
+      {
+        text: "Подросток хочет сделать татуировку. Родители против.",
+        options: [
+          { text: "Его тело — его выбор, даже если родители не согласны", scores: { gov: -8, soc: -5 } },
+          { text: "До 18 — решают родители, и это правильно", scores: { gov: +6, soc: +5 } },
+          { text: "Пусть подождёт год — если желание останется, значит осознанное", scores: { gov: +4 } },
+          { text: "Можно разрешить с согласия родителей — компромисс", scores: { gov: +5, soc: -3 } }
+        ]
+      },
+      {
+        text: "Обсуждают введение обязательной гражданской службы для всех молодых людей (не армия — больницы, парки, волонтёрство).",
+        options: [
+          { text: "Отличная идея — воспитывает ответственность и сплочённость", scores: { gov: +8, soc: +5 } },
+          { text: "Обязаловка убивает желание помогать — пусть будет добровольно", scores: { gov: -8 } },
+          { text: "Лучше сделать это добровольным, но с бонусами — стипендия, баллы при поступлении", scores: { gov: -4, econ: +4 } },
+          { text: "Хорошая идея, но только если государство обеспечит нормальные условия", scores: { gov: +5, econ: -4 } }
+        ]
+      },
+      {
+        text: "В школе вводят строгий дресс-код: одинаковая форма для всех, без исключений.",
+        options: [
+          { text: "Правильно — дисциплина и равенство, никто не выделяется богатством", scores: { gov: +7, econ: -4 } },
+          { text: "Это подавление индивидуальности — дети должны выражать себя", scores: { gov: -7, soc: -5 } },
+          { text: "Базовый дресс-код ок, но с возможностью вариаций", scores: { gov: +3, soc: -3 } },
+          { text: "Пусть каждая школа решает сама — не надо спускать сверху", scores: { gov: -5 } }
+        ]
+      },
+
+      // --- SOCIETY (6) ---
+      {
+        text: "Новый год. Друзья зовут в бар, семья — за стол с оливье. Времени на оба варианта нет.",
+        options: [
+          { text: "Семья — это святое, Новый год за общим столом", scores: { soc: +8 } },
+          { text: "Пойду к друзьям — семья поймёт, традиции не должны быть обязательными", scores: { soc: -7 } },
+          { text: "Сделаю по-своему — полчаса с семьёй, потом к друзьям", scores: { soc: -4 } },
+          { text: "Позову друзей к семье — зачем выбирать?", scores: { soc: +5, diplo: -4 } }
+        ]
+      },
+      {
+        text: "Знакомая пара живёт вместе 5 лет, но не хочет расписываться. Родственники давят.",
+        options: [
+          { text: "Их право — штамп в паспорте ничего не меняет", scores: { soc: -8 } },
+          { text: "Брак — основа общества, лучше бы оформили отношения", scores: { soc: +8 } },
+          { text: "Если без детей — их дело, а с детьми лучше оформить", scores: { soc: +4, gov: +4 } },
+          { text: "Родственники не должны лезть, но юридическая защита не помешает", scores: { soc: -4, gov: +3 } }
+        ]
+      },
+      {
+        text: "Молодой сотрудник предлагает радикально изменить рабочие процессы в компании. Старожилы сопротивляются.",
+        options: [
+          { text: "Свежий взгляд — это ценно, надо дать ему попробовать", scores: { soc: -7 } },
+          { text: "Работающую систему менять не надо — сначала пусть разберётся", scores: { soc: +7 } },
+          { text: "Пусть сделает пилотный проект — данные покажут, кто прав", scores: { soc: -5, econ: +4 } },
+          { text: "Изменения нужны, но постепенные и с уважением к опыту коллег", scores: { soc: +4 } }
+        ]
+      },
+      {
+        text: "Сын говорит, что хочет стать художником. Бабушка в ужасе — \"это не профессия\".",
+        options: [
+          { text: "Пусть следует мечте — творческие люди меняют мир", scores: { soc: -7 } },
+          { text: "Бабушка права — сначала нормальная профессия, потом хобби", scores: { soc: +8 } },
+          { text: "Можно совместить — дизайн, архитектура, где и творчество, и деньги", scores: { soc: +4, econ: +5 } },
+          { text: "Важнее всего, чтобы он сам принял решение и нёс ответственность", scores: { soc: -5, gov: -4 } }
+        ]
+      },
+      {
+        text: "Старый дом культуры в центре города хотят снести и построить на его месте современный коворкинг.",
+        options: [
+          { text: "Прогресс важнее — город должен развиваться", scores: { soc: -7, econ: +5 } },
+          { text: "Это наше наследие — нужно сохранить и отреставрировать", scores: { soc: +8 } },
+          { text: "Можно сделать и то и другое — коворкинг внутри отреставрированного здания", scores: { soc: +4, econ: +4 } },
+          { text: "Пусть жители района проголосуют — это их среда", scores: { soc: -3, gov: -5 } }
+        ]
+      },
+      {
+        text: "Бабушка просит внука-атеиста сходить с ней в церковь на Пасху. Ему неловко.",
+        options: [
+          { text: "Сходи — это уважение к старшим и традиции, не обязательно верить", scores: { soc: +8 } },
+          { text: "Не надо идти против убеждений ради чужих ожиданий", scores: { soc: -7, gov: -4 } },
+          { text: "Предложи бабушке другой совместный досуг — важна не церковь, а время вместе", scores: { soc: -4 } },
+          { text: "Пусть сходит один раз — от этого ничего не случится, а бабушке приятно", scores: { soc: +5 } }
+        ]
+      }
+    ];
+
+    // ========== PART 2: Quiz Engine ==========
+
+    let currentQuestion = 0;
+    let playerName = '';
+    const scores = { econ: 50, diplo: 50, gov: 50, soc: 50 };
+
+    const $ = (id) => document.getElementById(id);
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      $(screenId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // Welcome screen
+    const inputName = $('input-name');
+    const btnStart = $('btn-start');
+
+    inputName.addEventListener('input', () => {
+      btnStart.disabled = inputName.value.trim().length === 0;
+    });
+
+    // Shuffle array (Fisher-Yates)
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    let shuffledQuestions = [];
+
+    btnStart.addEventListener('click', () => {
+      playerName = inputName.value.trim();
+      if (!playerName) return;
+      currentQuestion = 0;
+      scores.econ = 50;
+      scores.diplo = 50;
+      scores.gov = 50;
+      scores.soc = 50;
+      shuffledQuestions = questions;
+      showScreen('screen-quiz');
+      renderQuestion();
+    });
+
+    inputName.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !btnStart.disabled) btnStart.click();
+    });
+
+    function renderQuestion() {
+      const q = shuffledQuestions[currentQuestion];
+      const total = questions.length;
+      const pct = ((currentQuestion + 1) / total) * 100;
+
+      $('progress-fill').style.width = pct + '%';
+      $('question-number').textContent = (currentQuestion + 1) + ' / ' + total;
+      $('question-text').textContent = q.text;
+
+      const optionsDiv = $('options');
+      optionsDiv.innerHTML = '';
+
+      q.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt.text;
+        btn.addEventListener('click', () => selectOption(opt, btn));
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function selectOption(opt, btn) {
+      // Visual feedback
+      btn.classList.add('selected');
+      // Disable all buttons
+      const buttons = $('options').querySelectorAll('.option');
+      buttons.forEach(b => { b.style.pointerEvents = 'none'; });
+
+      // Apply scores
+      if (opt.scores) {
+        for (const axis in opt.scores) {
+          scores[axis] = Math.max(0, Math.min(100, scores[axis] + opt.scores[axis]));
+        }
+      }
+
+      // Next question or result
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      }, 250);
+    }
+
+    // Restart
+    $('btn-restart').addEventListener('click', () => {
+      showScreen('screen-welcome');
+    });
+
+    // ========== PART 3: Types System (16 types) ==========
+
+    const types = {
+      "RNAT": { emoji: "\u{1F3F0}", name: "Железный канцлер", desc: "Порядок, скрепы, частная собственность. Бисмарк бы одобрил. Вы верите, что крепкая рука и свободный рынок -- лучшая комбинация." },
+      "RNAP": { emoji: "\u{1F680}", name: "Технократ-державник", desc: "Сильное государство, национальные интересы, но прогресс важнее догм. Пётр I модернизировал Россию топором -- вы бы одобрили." },
+      "RNST": { emoji: "\u26F5", name: "Вольный купец", desc: "Торгуем со своими, чужих не пускаем, но власть пусть не лезет. Вечевая республика с характером." },
+      "RNSP": { emoji: "\u{1F52C}", name: "Национал-футурист", desc: "Нация должна быть первой -- в науке, технологиях, космосе. Свобода внутри, амбиции наружу." },
+      "RGAT": { emoji: "\u{1F451}", name: "Корпоративный монарх", desc: "Глобальный рынок, сильная вертикаль, традиционные ценности. Если бы Газпром был страной -- это была бы ваша страна." },
+      "RGAP": { emoji: "\u{1F310}", name: "Глобальный архитектор", desc: "Мировой порядок через институты и договоры. Рынок без границ, правила для всех. Давос -- ваша духовная столица." },
+      "RGST": { emoji: "\u{1FA99}", name: "Вольный торговец", desc: "Свободная торговля, минимум правил, но семейные ценности на месте. Швейцария XIX века -- ваша утопия." },
+      "RGSP": { emoji: "\u{1F4BB}", name: "Кремниевый евангелист", desc: "Uber для всего, блокчейн для остального, государство -- помеха. Будущее уже наступило, просто неравномерно распределено." },
+      "ENAT": { emoji: "\u270A", name: "Народный трибун", desc: "Всё наше, чужим не дадим, вождь знает лучше. Справедливость для своих -- и точка." },
+      "ENAP": { emoji: "\u{1F3ED}", name: "Индустриальный комиссар", desc: "Национализация, модернизация, пятилетка за три года. Прогресс через мобилизацию." },
+      "ENST": { emoji: "\u{1F33E}", name: "Земский анархист", desc: "Община, самоуправление, никаких начальников. Земля тем, кто на ней работает. Толстой и Кропоткин в одном флаконе." },
+      "ENSP": { emoji: "\u{1F31F}", name: "Космический хиппи", desc: "Границы -- выдумка, собственность -- иллюзия, будущее -- за коммунами на Марсе. Леннон написал бы про вас песню." },
+      "EGAT": { emoji: "\u2696\uFE0F", name: "Социал-инженер", desc: "Мировое правительство, плановая экономика, всеобщее благо. Утопия -- не ругательство, а план действий." },
+      "EGAP": { emoji: "\u{1F30D}", name: "Прогрессивный глобалист", desc: "Открытые границы, зелёная экономика, всеобщий базовый доход. Скандинавия -- черновик, вы хотите чистовик." },
+      "EGST": { emoji: "\u{1F54A}\uFE0F", name: "Либеральный идеалист", desc: "Свобода, равенство, братство -- без иронии. Государство минимальное, солидарность максимальная, традиции в почёте." },
+      "EGSP": { emoji: "\u2728", name: "Радикальный утопист", desc: "Полная свобода, полное равенство, никаких границ, никаких скреп. Если это звучит безумно -- значит мир ещё не дорос." }
+    };
+
+    const centristType = { emoji: "\u{1F3AD}", name: "Абсолютный центрист", desc: "Вы ухитрились не занять позицию ни по одному вопросу. Это либо дзен, либо дипломатия высшего уровня. Идеальный переговорщик -- или идеальный уклонист." };
+
+    function getTypeKey() {
+      const axes = ['econ', 'diplo', 'gov', 'soc'];
+      const poles = {
+        econ: ['E', 'R'],
+        diplo: ['G', 'N'],
+        gov:   ['S', 'A'],
+        soc:   ['P', 'T']
+      };
+
+      let key = '';
+      let centerCount = 0;
+      const raw = [];
+
+      axes.forEach(axis => {
+        const v = scores[axis];
+        if (v > 60) {
+          raw.push(poles[axis][1]); // right pole
+        } else if (v < 40) {
+          raw.push(poles[axis][0]); // left pole
+        } else {
+          raw.push('C');
+          centerCount++;
+        }
+      });
+
+      if (centerCount === 4) return null; // absolute centrist
+
+      // Build key: for C axes, try both poles and pick existing type
+      if (centerCount === 0) return raw.join('');
+
+      // Generate all possible keys by replacing C with both poles
+      const centerIndices = [];
+      raw.forEach((ch, i) => { if (ch === 'C') centerIndices.push(i); });
+
+      let bestKey = null;
+      let bestDist = Infinity;
+
+      function generateKeys(arr, idx) {
+        if (idx >= centerIndices.length) {
+          const candidate = arr.join('');
+          if (types[candidate]) {
+            // Calculate distance: sum of |score - 50| for center axes (lower = closer to center)
+            let dist = 0;
+            centerIndices.forEach(ci => {
+              const axis = axes[ci];
+              dist += Math.abs(scores[axis] - 50);
+              // Prefer the pole the score leans toward
+              const lean = scores[axes[ci]] >= 50 ? 1 : 0;
+              if (arr[ci] === poles[axes[ci]][lean]) dist -= 0.5;
+            });
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestKey = candidate;
+            }
+          }
+          return;
+        }
+        const ci = centerIndices[idx];
+        const axis = axes[ci];
+        // Try the pole the score leans towards first
+        const lean = scores[axis] > 50 ? 1 : scores[axis] < 50 ? 0 : Math.round(Math.random());
+        const order = lean === 1 ? [1, 0] : [0, 1];
+        order.forEach(p => {
+          const copy = arr.slice();
+          copy[ci] = poles[axis][p];
+          generateKeys(copy, idx + 1);
+        });
+      }
+
+      generateKeys(raw.slice(), 0);
+      return bestKey;
+    }
+
+    // ========== PART 4: Show Result ==========
+
+    function showResult() {
+      const key = getTypeKey();
+      const type = key ? types[key] : centristType;
+
+      $('result-emoji').textContent = type.emoji;
+      $('result-type').textContent = type.name;
+      $('result-desc').textContent = type.desc;
+
+      // Axes
+      ['econ', 'diplo', 'gov', 'soc'].forEach(axis => {
+        const v = scores[axis];
+        $('marker-' + axis).style.left = v + '%';
+        // Set fill width
+        const axisRow = $('marker-' + axis).closest('.axis-row');
+        const fill = axisRow.querySelector('.axis-fill');
+        fill.style.width = v + '%';
+      });
+
+      // Result code
+      const code = Math.round(scores.econ) + '-' + Math.round(scores.diplo) + '-' + Math.round(scores.gov) + '-' + Math.round(scores.soc);
+      $('result-code').textContent = code;
+
+      // Copy handler
+      $('result-code').onclick = () => {
+        const text = playerName + ': ' + code;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            const hint = document.querySelector('.result-code-hint');
+            const orig = hint.textContent;
+            hint.textContent = 'скопировано!';
+            setTimeout(() => { hint.textContent = orig; }, 1500);
+          }).catch(() => {
+            fallbackCopy(text);
+          });
+        } else {
+          fallbackCopy(text);
+        }
+      };
+
+      showScreen('screen-result');
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      const hint = document.querySelector('.result-code-hint');
+      const orig = hint.textContent;
+      hint.textContent = 'скопировано!';
+      setTimeout(() => { hint.textContent = orig; }, 1500);
+    }
+  </script>
+</body>
+</html>
