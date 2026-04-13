@@ -1,0 +1,10 @@
+services:
+  politkabinet:
+    build: .
+    container_name: politkabinet
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
