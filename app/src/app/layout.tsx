@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "Политкабинет — узнай, кто ты на самом деле",
   description:
     "24 бытовые ситуации. 4 оси. 16 типов. Ты удивишься.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 const YM_ID = 108526234;
