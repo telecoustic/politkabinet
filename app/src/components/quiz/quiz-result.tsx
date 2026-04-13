@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import type { Scores } from "@/lib/types";
 import { getType, scoresToCode, codeToScores } from "@/lib/types";
 import { Comparison } from "./comparison";
+import { trackShareClick, trackShareCopy, trackFriendCodeEnter, trackCompareClick } from "@/lib/analytics";
 
 interface QuizResultProps {
   scores: Scores;
@@ -41,8 +42,10 @@ export function QuizResult({ scores, name, friendCode }: QuizResultProps) {
   }, [code]);
 
   const handleShare = useCallback(async () => {
+    trackShareClick();
     try {
       await navigator.clipboard.writeText(shareUrl);
+      trackShareCopy();
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -67,6 +70,7 @@ export function QuizResult({ scores, name, friendCode }: QuizResultProps) {
 
   const handleCompare = useCallback(() => {
     if (friendScores) {
+      trackCompareClick();
       setShowComparison(true);
     }
   }, [friendScores]);

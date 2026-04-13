@@ -4,7 +4,9 @@ import { useState, useCallback, useEffect } from "react";
 import { questions } from "@/lib/questions";
 import type { AxisKey } from "@/lib/questions";
 import type { Scores } from "@/lib/types";
+import { getTypeKey } from "@/lib/types";
 import { QuizResult } from "./quiz-result";
+import { trackQuizStart, trackQuizQuestion, trackQuizComplete } from "@/lib/analytics";
 
 interface QuizFlowProps {
   name: string;
@@ -27,30 +29,35 @@ export function QuizFlow({ name, friendCode }: QuizFlowProps) {
   const totalQuestions = questions.length;
   const question = questions[currentQuestion];
 
+  // Track quiz start on mount
+  useEffect(() => {
+    trackQuizStart();
+  }, []);
+
   const handleSelect = useCallback(
     (optionIndex: number) => {
-      if (selectedIndex !== null) return; // already selecting
+      if (selectedIndex !== null) return;
 
       setSelectedIndex(optionIndex);
+      trackQuizQuestion(currentQuestion + 1);
 
       const option = question.options[optionIndex];
-      setScores((prev) => {
-        const next = { ...prev };
-        const keys = Object.keys(option.scores) as AxisKey[];
-        for (const axis of keys) {
-          const delta = option.scores[axis];
-          if (delta !== undefined) {
-            next[axis] = clamp(next[axis] + delta, 0, 100);
-          }
+      const newScores = { ...scores };
+      const keys = Object.keys(option.scores) as AxisKey[];
+      for (const axis of keys) {
+        const delta = option.scores[axis];
+        if (delta !== undefined) {
+          newScores[axis] = clamp(newScores[axis] + delta, 0, 100);
         }
-        return next;
-      });
+      }
+      setScores(newScores);
 
-      // Visual feedback then advance
       setTimeout(() => {
         setFadeState("out");
         setTimeout(() => {
           if (currentQuestion + 1 >= totalQuestions) {
+            const typeKey = getTypeKey(newScores);
+            trackQuizComplete(typeKey || "centrist");
             setFinished(true);
           } else {
             setCurrentQuestion((q) => q + 1);
@@ -60,7 +67,7 @@ export function QuizFlow({ name, friendCode }: QuizFlowProps) {
         }, 200);
       }, 250);
     },
-    [selectedIndex, question, currentQuestion, totalQuestions]
+    [selectedIndex, question, currentQuestion, totalQuestions, scores]
   );
 
   // Keyboard support: 1-4 keys

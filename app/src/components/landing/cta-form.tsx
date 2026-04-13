@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { trackCtaClick } from "@/lib/analytics";
 
 export function CtaForm() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export function CtaForm() {
 
   const handleSubmit = useCallback(() => {
     if (!isValid) return;
+    trackCtaClick();
     const params = new URLSearchParams({ name: name.trim() });
     if (friendCode) {
       params.set("friend", friendCode);
