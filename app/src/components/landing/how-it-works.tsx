@@ -1,52 +1,63 @@
+import { AnimateOnScroll } from "./animate-on-scroll";
+
 const steps = [
   {
-    num: 1,
-    title: "Бытовые ситуации",
-    text: "Сосед шумит, друг потерял работу, в школе запретили телефоны. Ты выбираешь, что делать. Мы считаем, кто ты.",
+    title: "Отвечаешь на 24 ситуации",
+    text: "Сосед шумит, друг потерял работу, в аптеке нет аналога. Выбираешь, что бы сделал.",
+    color: "#e07a5f",
   },
   {
-    num: 2,
-    title: "4 оси, 16 типов",
-    text: 'Экономика, дипломатия, государство, общество. От "Железного канцлера" до "Космического хиппи". Один из них -- ты.',
+    title: "Получаешь свой тип",
+    text: "Один из 16 типов с ироничным описанием. Узнаёшь себя, удивляешься, делаешь скриншот.",
+    color: "#3d85c6",
   },
   {
-    num: 3,
-    title: "Сравни с друзьями",
-    text: "Скинь ссылку -- друг проходит -- вы видите, где совпадаете и где готовы начать гражданскую войну за ужином.",
+    title: "Кидаешь ссылку",
+    text: "Друг проходит — видишь 4 шкалы рядом, процент совпадения, главное расхождение.",
+    color: "#81b29a",
+  },
+  {
+    title: "Обсуждаете",
+    text: "«Почему у тебя авторитаризм 81?» — «Когда сосед курит, я за расстрел». Разговор — продукт.",
+    color: "#f2cc8f",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="border-t border-border py-12 px-5">
-      <div className="max-w-[640px] mx-auto">
-        <h2
-          className="text-[1.8rem] leading-[1.15] mb-2"
-          style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700 }}
-        >
-          Как это работает
-        </h2>
-        <p className="text-muted-foreground mb-8">Никакой политики. Почти.</p>
+    <section className="py-24 px-5 bg-[#eae4d9]">
+      <div className="max-w-[900px] mx-auto">
+        <AnimateOnScroll>
+          <p className="text-xs tracking-[0.25em] uppercase text-[#aaa] mb-3">
+            Никакой политики. Почти.
+          </p>
+          <h2
+            className="text-[clamp(1.6rem,4vw,2.4rem)] leading-[1.15] mb-14"
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700 }}
+          >
+            Как это работает
+          </h2>
+        </AnimateOnScroll>
 
-        <div className="flex flex-col gap-6">
-          {steps.map((step) => (
-            <div key={step.num} className="flex gap-4 items-start">
-              <div
-                className="shrink-0 w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center text-lg"
-                style={{ fontFamily: "Georgia, serif", fontWeight: 700 }}
-              >
-                {step.num}
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, i) => (
+            <AnimateOnScroll key={step.title} delay={i * 120}>
               <div>
+                <div
+                  className="w-full h-1 rounded-full mb-5"
+                  style={{ backgroundColor: step.color }}
+                />
                 <h3
-                  className="text-[1.1rem] mb-0.5"
+                  className="text-[1rem] mb-2"
                   style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700 }}
                 >
                   {step.title}
                 </h3>
-                <p className="text-[#666] text-[0.95rem] leading-relaxed">{step.text}</p>
+                <p className="text-[0.85rem] text-[#888] leading-relaxed">
+                  {step.text}
+                </p>
               </div>
-            </div>
+            </AnimateOnScroll>
           ))}
         </div>
       </div>

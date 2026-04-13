@@ -2,65 +2,36 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export function CtaForm() {
   const router = useRouter();
-  const [age, setAge] = useState("");
   const [name, setName] = useState("");
 
-  const ageNum = parseInt(age, 10);
-  const isValid =
-    name.trim().length > 0 &&
-    age.trim().length > 0 &&
-    !isNaN(ageNum) &&
-    ageNum >= 14 &&
-    ageNum <= 99;
+  const isValid = name.trim().length > 0;
 
   const handleSubmit = useCallback(() => {
     if (!isValid) return;
-    const params = new URLSearchParams({
-      name: name.trim(),
-      age: age.trim(),
-    });
+    const params = new URLSearchParams({ name: name.trim() });
     router.push(`/quiz/?${params.toString()}`);
-  }, [isValid, name, age, router]);
+  }, [isValid, name, router]);
 
   return (
-    <section id="cta" className="border-t border-border py-12 px-5 text-center pb-16">
-      <div className="max-w-[640px] mx-auto">
+    <section id="cta" className="py-24 px-5 bg-[#2c2c2c] text-[#f5f0e8] relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#e07a5f] rounded-full opacity-[0.04] blur-[120px]" />
+
+      <div className="max-w-[900px] mx-auto text-center relative">
         <h2
-          className="text-[1.8rem] leading-[1.15] mb-2"
+          className="text-[clamp(2rem,6vw,3.5rem)] leading-[1.05] tracking-[-0.02em] mb-4"
           style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700 }}
         >
           Ну что, готов?
         </h2>
-        <p className="text-[#666] mb-8">
-          Занимает 5 минут. Терять нечего, кроме иллюзий о себе.
+        <p className="text-[#888] mb-12 text-[1.1rem]">
+          Терять нечего, кроме иллюзий о себе.
         </p>
 
-        <div className="max-w-[320px] mx-auto flex flex-col gap-3">
-          <Input
-            type="number"
-            inputMode="numeric"
-            min={14}
-            max={99}
-            placeholder="Сколько тебе полных лет?"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const next = e.currentTarget
-                  .parentElement?.querySelector<HTMLInputElement>(
-                    'input[type="text"]'
-                  );
-                next?.focus();
-              }
-            }}
-            className="h-12 text-base text-center rounded-[10px] border-2 border-border bg-card placeholder:text-[#bbb] focus-visible:border-foreground focus-visible:ring-0"
-          />
-          <Input
+        <div className="max-w-[360px] mx-auto">
+          <input
             type="text"
             maxLength={30}
             placeholder="Как тебя зовут?"
@@ -69,20 +40,21 @@ export function CtaForm() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && isValid) handleSubmit();
             }}
-            className="h-12 text-base text-center rounded-[10px] border-2 border-border bg-card placeholder:text-[#bbb] focus-visible:border-foreground focus-visible:ring-0"
+            className="w-full h-14 text-lg text-center rounded-xl bg-[#3a3a3a] border border-[#555] text-[#f5f0e8] placeholder:text-[#666] focus:outline-none focus:border-[#e07a5f] focus:shadow-[0_0_0_3px_rgba(224,122,95,0.15)] transition-all px-4 mb-3"
           />
-          <Button
+          <button
             disabled={!isValid}
             onClick={handleSubmit}
-            className="h-12 text-lg rounded-[10px] mt-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full h-14 text-lg rounded-xl cursor-pointer bg-[#e07a5f] text-white hover:bg-[#d06a4f] active:scale-[0.98] disabled:opacity-25 disabled:cursor-not-allowed transition-all shadow-[0_4px_24px_rgba(224,122,95,0.3)] hover:shadow-[0_8px_32px_rgba(224,122,95,0.4)]"
             style={{ fontFamily: "Georgia, serif", fontWeight: 700 }}
           >
             Поехали
-          </Button>
-          <p className="text-xs text-[#bbb]">
-            Мы ничего не сохраняем. Даже если захотим -- негде.
-          </p>
+          </button>
         </div>
+
+        <p className="text-[0.75rem] text-[#555] mt-8">
+          Это не научное исследование. Мы ничего не сохраняем — негде.
+        </p>
       </div>
     </section>
   );
