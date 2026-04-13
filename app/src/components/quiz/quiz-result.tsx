@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import type { Scores } from "@/lib/types";
 import { getType, scoresToCode, codeToScores } from "@/lib/types";
 import { Comparison } from "./comparison";
-import { trackShareClick, trackShareCopy, trackFriendCodeEnter, trackCompareClick } from "@/lib/analytics";
+import { trackShareClick, trackShareCopy, trackCompareClick } from "@/lib/analytics";
 
 interface QuizResultProps {
   scores: Scores;
@@ -25,6 +25,7 @@ export function QuizResult({ scores, name, friendCode }: QuizResultProps) {
   const [friendInput, setFriendInput] = useState(friendCode || "");
   const [showComparison, setShowComparison] = useState(!!friendCode);
   const [copied, setCopied] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   const type = useMemo(() => getType(scores), [scores]);
   const code = useMemo(() => scoresToCode(scores), [scores]);
@@ -100,10 +101,21 @@ export function QuizResult({ scores, name, friendCode }: QuizResultProps) {
           </p>
 
           {type.fullDesc && (
-            <div className="text-left max-w-[500px] mx-auto text-[0.92rem] text-[#999] leading-[1.7] space-y-4">
-              {type.fullDesc.split('\n\n').map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+            <div className="max-w-[500px] mx-auto">
+              {!showFullDesc ? (
+                <button
+                  onClick={() => setShowFullDesc(true)}
+                  className="text-[#e07a5f] text-sm hover:underline cursor-pointer"
+                >
+                  Читать полный портрет
+                </button>
+              ) : (
+                <div className="text-left text-[0.92rem] text-[#999] leading-[1.7] space-y-4 mt-4">
+                  {type.fullDesc.split('\n\n').map((p, i) => (
+                    <p key={i}>{p}</p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

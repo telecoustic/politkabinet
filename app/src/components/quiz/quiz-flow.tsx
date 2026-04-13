@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { questions } from "@/lib/questions";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { questions, type Question } from "@/lib/questions";
 import type { AxisKey } from "@/lib/questions";
 import type { Scores } from "@/lib/types";
 import { getTypeKey } from "@/lib/types";
@@ -19,15 +19,34 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+// Fisher-Yates shuffle
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Shuffle questions and shuffle options within each question
+function prepareQuestions(): Question[] {
+  return shuffle(questions).map((q) => ({
+    ...q,
+    options: shuffle(q.options),
+  }));
+}
+
 export function QuizFlow({ name, friendCode }: QuizFlowProps) {
+  const shuffledQuestions = useMemo(() => prepareQuestions(), []);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [scores, setScores] = useState<Scores>({ ...initialScores });
   const [finished, setFinished] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [fadeState, setFadeState] = useState<"in" | "out">("in");
 
-  const totalQuestions = questions.length;
-  const question = questions[currentQuestion];
+  const totalQuestions = shuffledQuestions.length;
+  const question = shuffledQuestions[currentQuestion];
 
   // Track quiz start on mount
   useEffect(() => {

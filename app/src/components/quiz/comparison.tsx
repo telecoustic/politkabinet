@@ -3,88 +3,75 @@
 import { useMemo } from "react";
 import type { Scores } from "@/lib/types";
 import { getType } from "@/lib/types";
+import { axisTexts, chemistryTexts, discussionQuestions } from "@/lib/comparison-texts";
 
 interface ComparisonProps {
   myScores: Scores;
   friendScores: Scores;
 }
 
-interface AxisCompare {
-  key: string;
-  label: string;
-  leftLabel: string;
-  rightLabel: string;
-  color: string;
-  myValue: number;
-  friendValue: number;
-  diff: number;
-  comment: string;
+type AxisKey = "econ" | "diplo" | "gov" | "soc";
+
+const axisConfig = [
+  { key: "econ" as AxisKey, label: "Экономика", left: "Равенство", right: "Рынок" },
+  { key: "diplo" as AxisKey, label: "Дипломатия", left: "Глобализм", right: "Нация" },
+  { key: "gov" as AxisKey, label: "Государство", left: "Свобода", right: "Порядок" },
+  { key: "soc" as AxisKey, label: "Общество", left: "Прогресс", right: "Традиция" },
+];
+
+function pick(arr: string[]): string {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getAxisComment(myValue: number, friendValue: number, leftLabel: string, rightLabel: string): string {
-  const myCenter = myValue >= 40 && myValue <= 60;
-  const friendCenter = friendValue >= 40 && friendValue <= 60;
+function getPattern(my: number, friend: number): string {
+  const myPole = my > 60 ? "right" : my < 40 ? "left" : "center";
+  const friendPole = friend > 60 ? "right" : friend < 40 ? "left" : "center";
 
-  if (myCenter && friendCenter) {
-    return "Оба держитесь середины";
+  if (myPole === "center" && friendPole === "center") return "bothCenter";
+  if (myPole === "center" || friendPole === "center") return "oneCenterOneNot";
+  if (myPole === friendPole) return "samePole";
+  return "oppositePoles";
+}
+
+function countMatches(my: Scores, friend: Scores): number {
+  let matches = 0;
+  for (const axis of axisConfig) {
+    const pattern = getPattern(my[axis.key], friend[axis.key]);
+    if (pattern === "samePole" || pattern === "bothCenter") matches++;
   }
-
-  if (myCenter || friendCenter) {
-    return "Один из вас осторожничает, другой определился";
-  }
-
-  const myRight = myValue > 60;
-  const friendRight = friendValue > 60;
-
-  if (myRight === friendRight) {
-    return "Тут вы на одной волне";
-  }
-
-  return `А вот тут начнётся дискуссия: ${leftLabel} vs ${rightLabel}`;
+  return matches;
 }
 
 export function Comparison({ myScores, friendScores }: ComparisonProps) {
   const friendType = useMemo(() => getType(friendScores), [friendScores]);
 
   const matchPercent = useMemo(() => {
-    const diffs = [
-      Math.abs(myScores.econ - friendScores.econ),
-      Math.abs(myScores.diplo - friendScores.diplo),
-      Math.abs(myScores.gov - friendScores.gov),
-      Math.abs(myScores.soc - friendScores.soc),
-    ];
+    const diffs = axisConfig.map((a) =>
+      Math.abs(myScores[a.key] - friendScores[a.key])
+    );
     const avgDiff = diffs.reduce((a, b) => a + b, 0) / 4;
     return Math.round(100 - avgDiff);
   }, [myScores, friendScores]);
 
-  const axes: AxisCompare[] = useMemo(() => {
-    const axisConfigs = [
-      { key: "econ", label: "Экономика", leftLabel: "Равенство", rightLabel: "Рынок", color: "#e07a5f" },
-      { key: "diplo", label: "Дипломатия", leftLabel: "Глобализм", rightLabel: "Нация", color: "#3d85c6" },
-      { key: "gov", label: "Государство", leftLabel: "Свобода", rightLabel: "Порядок", color: "#81b29a" },
-      { key: "soc", label: "Общество", leftLabel: "Прогресс", rightLabel: "Традиция", color: "#f2cc8f" },
-    ];
+  const matches = useMemo(() => countMatches(myScores, friendScores), [myScores, friendScores]);
 
-    return axisConfigs.map((cfg) => {
-      const myVal = myScores[cfg.key as keyof Scores];
-      const friendVal = friendScores[cfg.key as keyof Scores];
-      return {
-        ...cfg,
-        myValue: myVal,
-        friendValue: friendVal,
-        diff: Math.abs(myVal - friendVal),
-        comment: getAxisComment(myVal, friendVal, cfg.leftLabel, cfg.rightLabel),
-      };
-    });
+  // Find axis with biggest difference for discussion question
+  const biggestDiffAxis = useMemo(() => {
+    let maxDiff = 0;
+    let maxKey: AxisKey = "econ";
+    for (const axis of axisConfig) {
+      const diff = Math.abs(myScores[axis.key] - friendScores[axis.key]);
+      if (diff > maxDiff) {
+        maxDiff = diff;
+        maxKey = axis.key;
+      }
+    }
+    return maxKey;
   }, [myScores, friendScores]);
 
-  const matchComment = useMemo(() => {
-    if (matchPercent >= 85) return "Вы практически клоны. Подозрительно.";
-    if (matchPercent >= 70) return "Много общего — спорить будете редко.";
-    if (matchPercent >= 55) return "Есть о чём поговорить за ужином.";
-    if (matchPercent >= 40) return "Разные взгляды — но это интересно.";
-    return "Политику лучше не обсуждать. Или наоборот — только её.";
-  }, [matchPercent]);
+  const chemistryKey = `match${Math.min(matches, 4)}`;
+  const chemistry = pick(chemistryTexts[chemistryKey] || chemistryTexts.match2);
+  const question = pick(discussionQuestions[biggestDiffAxis] || []);
 
   return (
     <div className="bg-[#2c2c2c] rounded-2xl px-5 py-8 text-[#f5f0e8]">
@@ -92,13 +79,15 @@ export function Comparison({ myScores, friendScores }: ComparisonProps) {
       <div className="text-center mb-8">
         <p className="text-[#888] text-sm mb-1">Совпадение</p>
         <p
-          className="text-[3rem] leading-none mb-2"
+          className="text-[3rem] leading-none mb-3"
           style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700 }}
         >
           {matchPercent}%
         </p>
-        <p className="text-[#aaa] text-sm">{matchComment}</p>
-        <p className="text-[#666] text-xs mt-2">
+        <p className="text-[#ccc] text-sm max-w-[400px] mx-auto leading-relaxed">
+          {chemistry}
+        </p>
+        <p className="text-[#666] text-xs mt-3">
           Друг — {friendType.emoji} {friendType.name}
         </p>
       </div>
@@ -117,37 +106,53 @@ export function Comparison({ myScores, friendScores }: ComparisonProps) {
 
       {/* Axes comparison */}
       <div className="flex flex-col gap-6">
-        {axes.map((axis) => (
-          <div key={axis.key}>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs text-[#666]">{axis.leftLabel}</span>
-              <span className="text-xs text-[#888]">{axis.label}</span>
-              <span className="text-xs text-[#666]">{axis.rightLabel}</span>
+        {axisConfig.map((axis) => {
+          const pattern = getPattern(myScores[axis.key], friendScores[axis.key]);
+          const texts = axisTexts[axis.key]?.[pattern] || [];
+          const comment = texts.length > 0 ? pick(texts) : "";
+
+          return (
+            <div key={axis.key}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-[#666]">{axis.left}</span>
+                <span className="text-xs text-[#888]">{axis.label}</span>
+                <span className="text-xs text-[#666]">{axis.right}</span>
+              </div>
+              <div className="relative h-3 bg-[#3a3a3a] rounded-full">
+                <div
+                  className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-[#2c2c2c] shadow-[0_0_4px_rgba(0,0,0,0.5)] z-10"
+                  style={{
+                    left: `clamp(4%, ${myScores[axis.key]}%, 96%)`,
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "#e07a5f",
+                  }}
+                />
+                <div
+                  className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-[#2c2c2c] shadow-[0_0_4px_rgba(0,0,0,0.5)] z-10"
+                  style={{
+                    left: `clamp(4%, ${friendScores[axis.key]}%, 96%)`,
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "#3d85c6",
+                  }}
+                />
+              </div>
+              {comment && (
+                <p className="text-xs text-[#888] mt-2 leading-relaxed">{comment}</p>
+              )}
             </div>
-            <div className="relative h-3 bg-[#3a3a3a] rounded-full">
-              {/* My marker (orange) */}
-              <div
-                className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-[#2c2c2c] shadow-[0_0_4px_rgba(0,0,0,0.5)] z-10"
-                style={{
-                  left: `${axis.myValue}%`,
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "#e07a5f",
-                }}
-              />
-              {/* Friend marker (blue) */}
-              <div
-                className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-[#2c2c2c] shadow-[0_0_4px_rgba(0,0,0,0.5)] z-10"
-                style={{
-                  left: `${axis.friendValue}%`,
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "#3d85c6",
-                }}
-              />
-            </div>
-            <p className="text-xs text-[#888] mt-1.5 text-center">{axis.comment}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* Discussion question */}
+      {question && (
+        <div className="mt-8 pt-6 border-t border-[#444]">
+          <p className="text-xs text-[#666] uppercase tracking-wider mb-2">Попробуйте обсудить</p>
+          <p className="text-[0.95rem] text-[#ccc] leading-relaxed italic">
+            {question}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
